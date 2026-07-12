@@ -1,30 +1,33 @@
-import os
+PACKAGES = [
+    "requests",
+    "rich",
+    "colorama",
+    "numpy",
+    "pandas",
+    "flask",
+    "fastapi"
+]
 
-PACKAGE_DIR = "packages"
 
+def show_packages():
 
-def get_packages():
+    print("\n📦 Installed Packages\n")
 
-    if not os.path.exists(PACKAGE_DIR):
-        return []
+    if not PACKAGES:
 
-    packages = []
+        print("No package installed")
 
-    for item in os.listdir(PACKAGE_DIR):
+        return
 
-        folder = os.path.join(PACKAGE_DIR, item)
+    for pkg in PACKAGES:
 
-        if os.path.isdir(folder) and item != "__pycache__":
-            packages.append(item)
-
-    return sorted(packages)
+        print(f"✓ {pkg}")
 
 
 def search_package(keyword):
 
-    keyword = keyword.lower()
-
     return [
-        pkg for pkg in get_packages()
-        if keyword in pkg.lower()
+        pkg
+        for pkg in PACKAGES
+        if keyword.lower() in pkg.lower()
     ]
