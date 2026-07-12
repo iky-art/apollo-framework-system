@@ -1,42 +1,51 @@
 import os
-import importlib
 
 
-def get_modules():
+def load_modules():
 
-    modules = []
+    print("\n📦 Installed Modules\n")
 
     path = "modules"
 
     if not os.path.exists(path):
-        return modules
+
+        print("Modules folder not found")
+
+        return
+
+    items = os.listdir(path)
+
+    if not items:
+
+        print("No modules installed")
+
+        return
+
+    for item in items:
+
+        print(f"✓ {item}")
 
 
-    for item in os.listdir(path):
+def load_plugins():
 
-        if os.path.isdir(
-            os.path.join(path, item)
-        ):
-            modules.append(item)
+    print("\n🔌 Installed Plugins\n")
 
+    path = "plugins"
 
-    return modules
+    if not os.path.exists(path):
 
+        print("Plugins folder not found")
 
+        return
 
-def run_module(name):
+    items = os.listdir(path)
 
-    try:
+    if not items:
 
-        module = importlib.import_module(
-            f"modules.{name}.info"
-        )
+        print("No plugins installed")
 
-        module.run()
+        return
 
+    for item in items:
 
-    except Exception as e:
-
-        print(
-            f"❌ Module error: {e}"
-        )
+        print(f"✓ {item}")
