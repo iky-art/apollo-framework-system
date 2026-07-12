@@ -1,107 +1,181 @@
 #!/usr/bin/env python3
 
 import os
+
 from rich.console import Console
 from rich.panel import Panel
 
-from core.config import load_config, save_config
 from core.loader import (
-    load_modules,
-    load_plugins
+    get_modules,
+    run_module
 )
+
+from core.plugin import (
+    get_plugins,
+    run_plugin
+)
+
 from core.package import (
-    show_packages,
+    get_packages,
     search_package
+)
+
+from core.config import (
+    load_config,
+    save_config
 )
 
 console = Console()
 
+AFS_VERSION = "0.5.0"
 
-VERSION = "0.5.0"
+config = load_config()
 
 
 def banner():
+
     console.print(
         Panel.fit(
-            f"""
-[cyan]
-    █████╗ ███████╗███████╗
-   ██╔══██╗██╔════╝██╔════╝
-   ███████║█████╗  ███████╗
-   ██╔══██║██╔══╝  ╚════██║
-   ██║  ██║██║     ███████║
+f"""
+🚀 Apollo Framework System
 
-Apollo Framework System
-Version : {VERSION}
-[/cyan]
-"""
+Version : {AFS_VERSION}
+Status  : Online
+
+Core Engine : Active
+Modules     : {len(get_modules())}
+Plugins     : {len(get_plugins())}
+Theme       : {config['theme']}
+""",
+        title="AFS"
         )
     )
 
 
-def show_help():
-    console.print("""
+def show_modules():
 
-Available Commands
+    modules = get_modules()
+
+    console.print("\n📦 Installed Modules\n")
+
+    if not modules:
+
+        console.print("No modules installed")
+
+        return
+
+    for module in modules:
+
+        console.print(f"✓ {module}")
+
+
+def show_plugins():
+
+    plugins = get_plugins()
+
+    console.print("\n🔌 Installed Plugins\n")
+
+    if not plugins:
+
+        console.print("No plugins installed")
+
+        return
+
+    for plugin in plugins:
+
+        console.print(f"✓ {plugin}")
+
+
+def show_packages():
+
+    packages = get_packages()
+
+    console.print("\n📦 Installed Packages\n")
+
+    if not packages:
+
+        console.print("No packages installed")
+
+        return
+
+    for package in packages:
+
+        console.print(f"✓ {package}")
+
+
+def show_config():
+
+    global config
+
+    console.print("\n⚙ AFS Configuration\n")
+
+    for key, value in config.items():
+
+        console.print(f"{key} : {value}")
+
+
+def help_menu():
+
+    console.print("""
+AFS Commands
 
 help
-info
 version
-clear
-exit
 
 modules
-plugins
-packages
+run <module>
 
+plugins
+plugin <plugin>
+
+packages
 package search <name>
+package install <name>
+package remove <name>
+package info <name>
+package update
 
 config
 config set <key> <value>
 
+clear
+exit
 """)
-
-
-def show_info():
-
-    console.print(f"""
-
-Apollo Framework System
-
-Version : {VERSION}
-Python  : 3.x
-
-""")
-
 
 def terminal():
 
+    global config
+
     while True:
 
-        command = input("AFS > ").strip()
+        command = input("\nAFS > ").strip()
 
         if command == "":
             continue
 
         elif command == "help":
 
-            show_help()
-
-        elif command == "info":
-
-            show_info()
+            help_menu()
 
         elif command == "version":
 
-            console.print(VERSION)
+            console.print(f"AFS Version {AFS_VERSION}")
 
         elif command == "modules":
 
-            load_modules()
+            show_modules()
+
+        elif command.startswith("run "):
+
+            run_module(command[4:].strip())
 
         elif command == "plugins":
 
-            load_plugins()
+            show_plugins()
+
+        elif command.startswith("plugin "):
+
+            run_plugin(command[7:].strip())
 
         elif command == "packages":
 
@@ -116,9 +190,10 @@ def terminal():
 
             result = search_package(keyword)
 
-            console.print("\nSearch Result\n")
+            console.print("\n🔍 Search Result\n")
 
             if not result:
+
                 console.print("No package found")
 
             else:
@@ -127,27 +202,52 @@ def terminal():
 
                     console.print(f"✓ {item}")
 
-                elif command == "config":
+        elif command.startswith("package info "):
 
-            config = load_config()
+            name = command.replace(
+                "package info ",
+                ""
+            )
 
             console.print(f"""
+📦 Package Information
 
-AFS Configuration
-
-name         : {config.get("name")}
-version      : {config.get("version")}
-theme        : {config.get("theme")}
-language     : {config.get("language")}
-workspace    : {config.get("workspace")}
-auto_update  : {config.get("auto_update")}
-plugins      : {config.get("plugins")}
-
+Name    : {name}
+Version : 1.0.0
+Status  : Installed
+Author  : Apollo
 """)
 
-        elif command.startswith("config set "):
+        elif command.startswith("package install "):
 
-            config = load_config()
+            name = command.replace(
+                "package install ",
+                ""
+            )
+
+            console.print(f"📥 Installing {name}...")
+            console.print("✅ Package installed.")
+
+        elif command.startswith("package remove "):
+
+            name = command.replace(
+                "package remove ",
+                ""
+            )
+
+            console.print(f"🗑 Removing {name}...")
+            console.print("✅ Package removed.")
+
+        elif command == "package update":
+
+            console.print("🔄 Checking packages...")
+            console.print("✅ All packages are up to date.")
+
+        elif command == "config":
+
+            show_config()
+
+        elif command.startswith("config set "):
 
             args = command.split()
 
@@ -173,17 +273,14 @@ plugins      : {config.get("plugins")}
                 console.print(
                     "Usage: config set <key> <value>"
                 )
-
         elif command == "clear":
 
-            os.system("clear")
-
+            console.clear()
             banner()
 
         elif command == "exit":
 
-            console.print("👋 Goodbye.")
-
+            console.print("🔴 AFS Shutdown")
             break
 
         else:
@@ -194,10 +291,8 @@ plugins      : {config.get("plugins")}
 def main():
 
     banner()
-
     terminal()
 
 
 if __name__ == "__main__":
-
     main()

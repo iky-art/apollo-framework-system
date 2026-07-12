@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environment
+venv/
+.env
+.venv/
+
+# Logs
+logs/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Temporary
+*.tmp
+*.bak
+
+# Package Cache
+pip-wheel-metadata/
+
+# Build
+build/
+dist/
+*.egg-info/
+
+# AFS Workspace
+workspace/
+
+# GitHub
+.github/

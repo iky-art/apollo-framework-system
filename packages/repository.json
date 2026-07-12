@@ -1,0 +1,24 @@
+{
+  "packages": [
+    {
+      "name": "rich",
+      "version": "14.0.0",
+      "author": "Textualize"
+    },
+    {
+      "name": "requests",
+      "version": "2.32.0",
+      "author": "Python"
+    },
+    {
+      "name": "numpy",
+      "version": "2.3.0",
+      "author": "NumPy"
+    },
+    {
+      "name": "apollo-core",
+      "version": "1.0.0",
+      "author": "Apollo AI"
+    }
+  ]
+}
