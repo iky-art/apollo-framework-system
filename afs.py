@@ -17,7 +17,9 @@ from core.plugin import (
 
 from core.package import (
     get_packages,
-    search_package
+    search_package,
+    install_package,
+    remove_package
 )
 
 from core.config import (
@@ -34,6 +36,8 @@ config = load_config()
 
 def banner():
 
+    global config
+
     console.print(
         Panel.fit(
 f"""
@@ -45,7 +49,7 @@ Status  : Online
 Core Engine : Active
 Modules     : {len(get_modules())}
 Plugins     : {len(get_plugins())}
-Theme       : {config['theme']}
+Theme       : {config.get("theme")}
 """,
         title="AFS"
         )
@@ -54,9 +58,9 @@ Theme       : {config['theme']}
 
 def show_modules():
 
-    modules = get_modules()
-
     console.print("\n📦 Installed Modules\n")
+
+    modules = get_modules()
 
     if not modules:
 
@@ -71,9 +75,9 @@ def show_modules():
 
 def show_plugins():
 
-    plugins = get_plugins()
-
     console.print("\n🔌 Installed Plugins\n")
+
+    plugins = get_plugins()
 
     if not plugins:
 
@@ -88,9 +92,9 @@ def show_plugins():
 
 def show_packages():
 
-    packages = get_packages()
-
     console.print("\n📦 Installed Packages\n")
+
+    packages = get_packages()
 
     if not packages:
 
@@ -106,6 +110,8 @@ def show_packages():
 def show_config():
 
     global config
+
+    config = load_config()
 
     console.print("\n⚙ AFS Configuration\n")
 
@@ -141,7 +147,6 @@ config set <key> <value>
 clear
 exit
 """)
-
 def terminal():
 
     global config
@@ -167,7 +172,7 @@ def terminal():
 
         elif command.startswith("run "):
 
-            run_module(command[4:].strip())
+            run_module(command.replace("run ", ""))
 
         elif command == "plugins":
 
@@ -175,7 +180,7 @@ def terminal():
 
         elif command.startswith("plugin "):
 
-            run_plugin(command[7:].strip())
+            run_plugin(command.replace("plugin ", ""))
 
         elif command == "packages":
 
@@ -202,22 +207,6 @@ def terminal():
 
                     console.print(f"✓ {item}")
 
-        elif command.startswith("package info "):
-
-            name = command.replace(
-                "package info ",
-                ""
-            )
-
-            console.print(f"""
-📦 Package Information
-
-Name    : {name}
-Version : 1.0.0
-Status  : Installed
-Author  : Apollo
-""")
-
         elif command.startswith("package install "):
 
             name = command.replace(
@@ -225,8 +214,13 @@ Author  : Apollo
                 ""
             )
 
-            console.print(f"📥 Installing {name}...")
-            console.print("✅ Package installed.")
+            if install_package(name):
+
+                console.print(f"✅ {name} installed successfully.")
+
+            else:
+
+                console.print(f"⚠ {name} already installed.")
 
         elif command.startswith("package remove "):
 
@@ -235,8 +229,35 @@ Author  : Apollo
                 ""
             )
 
-            console.print(f"🗑 Removing {name}...")
-            console.print("✅ Package removed.")
+            if remove_package(name):
+
+                console.print(f"🗑 {name} removed successfully.")
+
+            else:
+
+                console.print(f"❌ {name} is not installed.")
+
+        elif command.startswith("package info "):
+
+            name = command.replace(
+                "package info ",
+                ""
+            )
+
+            result = search_package(name)
+
+            if result:
+
+                console.print(f"""
+📦 Package Information
+
+Name    : {name}
+Status  : Available
+""")
+
+            else:
+
+                console.print("Package not found.")
 
         elif command == "package update":
 
@@ -254,12 +275,15 @@ Author  : Apollo
             if len(args) >= 4:
 
                 key = args[2]
+
                 value = " ".join(args[3:])
 
                 if value.lower() == "true":
+
                     value = True
 
                 elif value.lower() == "false":
+
                     value = False
 
                 config[key] = value
@@ -273,26 +297,52 @@ Author  : Apollo
                 console.print(
                     "Usage: config set <key> <value>"
                 )
+
         elif command == "clear":
 
             console.clear()
+
             banner()
 
         elif command == "exit":
 
-            console.print("🔴 AFS Shutdown")
+            console.print("👋 Goodbye!")
+
             break
 
         else:
 
-            console.print("❌ Unknown command")
+            console.print(
+                f"❌ Unknown command: {command}"
+            )
+def startup():
+
+    console.print("[green]Initializing Apollo Framework System...[/green]")
+
+    try:
+
+        modules = get_modules()
+        plugins = get_plugins()
+        packages = get_packages()
+
+        console.print(f"✅ Modules Loaded : {len(modules)}")
+        console.print(f"✅ Plugins Loaded : {len(plugins)}")
+        console.print(f"✅ Packages Loaded : {len(packages)}")
+
+    except Exception as e:
+
+        console.print(f"[red]Startup Error : {e}[/red]")
 
 
 def main():
 
     banner()
+
+    startup()
+
     terminal()
 
 
 if __name__ == "__main__":
+
     main()
