@@ -29,7 +29,7 @@ from core.config import (
 
 console = Console()
 
-AFS_VERSION = "0.5.0"
+AFS_VERSION = "0.5.1"
 
 config = load_config()
 
